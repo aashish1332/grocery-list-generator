@@ -112,7 +112,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const cartContext = cart && cart.length > 0 
       ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
@@ -136,14 +136,22 @@ app.post('/api/chat', async (req, res) => {
     
     res.json({ text });
   } catch (error) {
-    console.error('AI Chat Error:', error);
+    console.error('AI Chat Error:', error.message);
+    
+    const errorMsg = error.message || '';
+    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Too Many Requests')) {
+      return res.status(429).json({ 
+        text: "I'm getting a lot of requests right now! The free Gemini API quota has been temporarily exceeded. Please wait a minute and try again. 🙏"
+      });
+    }
+    
     res.status(500).json({ 
       message: 'AI Assistant is currently unavailable', 
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.message
     });
   }
 });
+
 
 
 
