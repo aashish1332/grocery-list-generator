@@ -141,9 +141,9 @@ app.post('/api/chat', async (req, res) => {
     res.json({ text });
   } catch (error) {
     console.error('AI Chat Error:', error.message);
+    console.error('AI Chat Error Status:', error.status);
     
-    const errorMsg = error.message || '';
-    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Rate limit')) {
+    if (error.status === 429) {
       return res.status(429).json({ 
         text: "I'm getting a lot of requests right now! Please wait a moment and try again. 🙏"
       });
@@ -151,8 +151,10 @@ app.post('/api/chat', async (req, res) => {
     
     res.status(500).json({ 
       message: 'AI Assistant is currently unavailable', 
-      error: error.message
+      error: error.message,
+      status: error.status
     });
+
   }
 });
 
