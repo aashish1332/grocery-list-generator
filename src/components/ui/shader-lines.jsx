@@ -116,20 +116,18 @@ export function ShaderAnimation({ isLightMode }) {
           }
         }
 
-        // Add a subtle radial gradient to the background
-        float dist = length(uv);
-        vec3 bgDark = mix(vec3(0.02, 0.01, 0.05), vec3(0.0), dist * 0.5);
-        vec3 darkColor = bgDark + vec3(color[2], color[1], color[0]);
+        vec3 darkColor = vec3(color[2], color[1], color[0]);
         
-        // Light mode colors
-        vec3 baseLight = mix(vec3(0.98, 0.94, 0.94), vec3(1.0), dist * 0.5);
-        vec3 lightLines = vec3(color[2], color[1], color[0]) * 0.6;
+        // Light mode colors (darker lines on light background)
+        vec3 baseLight = vec3(0.96, 0.96, 0.98); // Almost white
+        vec3 lightLines = vec3(color[2], color[1], color[0]) * 0.4; // Soften the lines
         vec3 finalLightColor = clamp(baseLight - lightLines, 0.0, 1.0);
         
         vec3 finalColor = mix(darkColor, finalLightColor, lightMode);
         
         gl_FragColor = vec4(finalColor, 1.0);
       }
+
 
     `
 
