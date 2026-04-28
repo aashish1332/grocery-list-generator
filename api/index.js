@@ -112,7 +112,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
 
     const cartContext = cart && cart.length > 0 
       ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
