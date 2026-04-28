@@ -4,8 +4,10 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import User from './models/User.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -98,6 +100,47 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+// AI Chat Route
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, cart } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(500).json({ message: 'AI API Key not configured on server' });
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const cartContext = cart && cart.length > 0 
+      ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
+      : 'Cart is empty.';
+
+    const prompt = `You are an intelligent grocery assistant for "SmartGrocery", a premium grocery shopping app.
+      User's current state: ${cartContext}
+      User's message: "${message}"
+      
+      Instructions:
+      - Be helpful, polite, and concise.
+      - Suggest relevant Indian groceries if asked for recommendations.
+      - If they ask for a recipe, check their cart and suggest what they can make or what's missing.
+      - Keep responses under 3 paragraphs.
+      
+      Respond as the AI assistant:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    res.json({ text });
+  } catch (error) {
+    console.error('AI Chat Error:', error);
+    res.status(500).json({ message: 'AI Assistant is currently unavailable', error: error.message });
+  }
+});
+
 
 // Start Server (only for local dev)
 if (process.env.NODE_ENV !== 'production') {

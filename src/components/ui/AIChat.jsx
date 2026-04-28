@@ -52,22 +52,43 @@ export function AIChat({ cart, allProducts, onAddToCart }) {
     return "I'm a demo AI. In a production environment, I would analyze your cart (" + cart.length + " items) and our full catalog to give you perfect grocery advice!";
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const newMsg = { id: Date.now(), role: 'user', text: input };
+    const userMessageText = input.trim();
+    const newMsg = { id: Date.now(), role: 'user', text: userMessageText };
     setMessages(prev => [...prev, newMsg]);
     setInput('');
 
-    // Simulate AI delay
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev, 
-        { id: Date.now() + 1, role: 'ai', text: generateAIResponse(newMsg.text) }
-      ]);
-    }, 800);
+    // Add a temporary "typing" message
+    const typingId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: typingId, role: 'ai', text: '...', isTyping: true }]);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://smart-grocery-lemon.vercel.app';
+      const response = await fetch(`${apiUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessageText, cart })
+      });
+
+      const data = await response.json();
+      
+      setMessages(prev => prev.filter(m => !m.isTyping).concat({
+        id: Date.now() + 2,
+        role: 'ai',
+        text: data.text || data.message || "I'm having trouble connecting right now. Please try again."
+      }));
+    } catch (error) {
+      setMessages(prev => prev.filter(m => !m.isTyping).concat({
+        id: Date.now() + 2,
+        role: 'ai',
+        text: "Sorry, I'm offline at the moment. Please check your connection."
+      }));
+    }
   };
+
 
   return (
     <>
@@ -159,7 +180,19 @@ export function AIChat({ cart, allProducts, onAddToCart }) {
                     lineHeight: '1.4'
                   }}
                 >
-                  {msg.text}
+                  {msg.isTyping ? (
+                    <motion.div 
+                      display="flex" 
+                      gap="4px"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }}>.</motion.span>
+                      <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}>.</motion.span>
+                      <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}>.</motion.span>
+                    </motion.div>
+                  ) : msg.text}
+
                 </div>
               ))}
               <div ref={messagesEndRef} />

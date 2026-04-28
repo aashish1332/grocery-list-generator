@@ -12,7 +12,8 @@ import {
   Settings, 
   Plus,
   Check,
-  Key,
+
+
   Trash2,
   TrendingUp,
   History,
@@ -99,8 +100,7 @@ MOCK_PAST_ORDERS.forEach(order => {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('auth') === 'true');
   const [isLightMode, setIsLightMode] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiModal, setShowApiModal] = useState(false);
+
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -131,10 +131,7 @@ function App() {
     setCart(prev => prev.filter(i => i.id !== itemId));
   };
 
-  const handleSaveApiKey = (e) => {
-    e.preventDefault();
-    setShowApiModal(false);
-  };
+
 
   // Generate Suggestions based on Context (Cold Start vs Active Cart)
   const suggestions = useMemo(() => {
@@ -294,16 +291,7 @@ function App() {
               >
                 {isLightMode ? <Moon size={20} /> : <Sun size={20} />}
               </button>
-              <motion.button 
-              className="btn btn-outline"
-              onClick={() => setShowApiModal(true)}
-              title="Set AI API Key"
-              whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(220, 38, 38, 0.4)" }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Key size={18} />
-              <span className="hidden-mobile">API Key</span>
-            </motion.button>
+
             <div style={{ position: 'relative' }}>
               <motion.button 
                 className="btn btn-primary"
@@ -772,55 +760,7 @@ function App() {
         <Route path="/login" element={<Auth setIsAuthenticated={setIsAuthenticated} />} />
       </Routes>
 
-      {/* API Key Modal */}
-      <AnimatePresence>
-        {showApiModal && (
-          <motion.div 
-            className="modal-overlay"
-            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-            animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
-            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          >
-            <motion.div 
-              className="modal-content"
-              initial={{ scale: 0.8, y: 50, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.8, y: 50, opacity: 0 }}
-              transition={{ type: 'spring', bounce: 0.4 }}
-            >
-              <div className="modal-header">
-                <h3>AI Integration Setup</h3>
-                <p>Enter your API key to enable live smart suggestions.</p>
-              </div>
-              <form onSubmit={handleSaveApiKey}>
-                <div className="input-group">
-                  <label htmlFor="apiKey">API Key</label>
-                  <input 
-                    type="password" 
-                    id="apiKey" 
-                    placeholder="sk-..." 
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-                <div className="modal-actions">
-                  <button 
-                    type="button" 
-                    className="btn btn-outline"
-                    onClick={() => setShowApiModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Save Key
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
       {isAuthenticated && <AIChat cart={cart} allProducts={ALL_PRODUCTS} />}
     </>
   );
