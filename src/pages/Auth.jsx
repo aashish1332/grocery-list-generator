@@ -20,17 +20,25 @@ export default function Auth({ setIsAuthenticated }) {
       : { name: formData.name, email: formData.email, password: formData.password };
 
     try {
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(text.includes('server error') ? 'Server error occurred. Please check backend logs.' : 'Unexpected response from server');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Something went wrong');
       }
+
 
       // Store auth data for both login and registration
       localStorage.setItem('auth', 'true');

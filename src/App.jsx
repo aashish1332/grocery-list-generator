@@ -103,6 +103,15 @@ function App() {
   const [showApiModal, setShowApiModal] = useState(false);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isLightMode) {
@@ -255,11 +264,11 @@ function App() {
               >
                 <ShoppingCart className="logo-icon" size={28} />
               </motion.div>
-              SmartGrocery
+              <span className="logo-text">SmartGrocery</span>
             </Link>
           </motion.div>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '1.5rem', fontWeight: 600 }}>
+          <div className="nav-links-container">
+            <div className="nav-links hidden-mobile">
               <Link to="/about" style={{ textDecoration: 'none', color: 'var(--text-main)', transition: 'color 0.2s' }}>About Us</Link>
               {isAuthenticated ? (
                 <button 
@@ -459,23 +468,25 @@ function App() {
               </div>
             </div>
 
-            {/* Right Content - Spline */}
-            <div style={{ 
-              flex: '1 1 400px', 
-              height: '100%', 
-              position: 'relative', 
-              minHeight: '500px', 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
-              maskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)'
-            }}>
-              <SplineScene 
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="spline-canvas"
-              />
-            </div>
+            {/* Right Content - Spline (Desktop Only) */}
+            {isDesktop && (
+              <div style={{ 
+                flex: '1 1 400px', 
+                height: '100%', 
+                position: 'relative', 
+                minHeight: '500px', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)',
+                maskImage: 'linear-gradient(to bottom, black 75%, transparent 100%)'
+              }}>
+                <SplineScene 
+                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  className="spline-canvas"
+                />
+              </div>
+            )}
             
           </div>
         </div>

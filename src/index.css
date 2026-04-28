@@ -166,6 +166,31 @@ h1 {
   width: 100%;
 }
 
+/* Responsive Utilities */
+.hidden-mobile {
+  display: flex !important;
+}
+
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
+  }
+}
+
+.hidden-desktop {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .hidden-desktop {
+    display: flex !important;
+  }
+}
+
 .navbar {
   padding: 0.75rem 0;
   position: sticky;
@@ -183,6 +208,39 @@ h1 {
   justify-content: space-between;
   align-items: center;
 }
+
+.nav-links-container {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .nav-links-container {
+    gap: 0.75rem;
+  }
+  
+  .navbar-content {
+    padding: 0 1rem;
+  }
+  
+  .logo-text {
+    display: none; /* Only show icon on very small screens if needed, but let's see */
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    display: none;
+  }
+}
+
 
 .logo {
   font-size: 1.5rem;
@@ -219,9 +277,33 @@ h1 {
   padding-bottom: 4rem;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1024px) {
   .dashboard-grid {
     grid-template-columns: 350px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    padding-top: 2rem !important;
+    gap: 1.5rem;
+  }
+  
+  .suggestions-panel {
+    padding: 1.5rem !important;
+  }
+  
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  
+  .grocery-card {
+    padding: 1rem;
+  }
+  
+  .insights-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -728,6 +810,32 @@ h1 {
   justify-content: center;
   color: white;
   padding: 2rem 0;
+}
+
+@media (max-width: 1024px) {
+  .hero-container {
+    min-height: auto;
+    padding: 4rem 0;
+  }
+  
+  .hero-overlay {
+    padding: 0 1.5rem !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  
+  .hero-content {
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .hero-subtitle {
+    text-align: center !important;
+  }
+  
+  .hero-buttons {
+    justify-content: center !important;
+  }
 }
 .hero-badge-wrapper {
   margin-bottom: 2rem;
