@@ -66,12 +66,12 @@ export function AIChat({ cart, allProducts, onAddToCart }) {
     setMessages(prev => [...prev, { id: typingId, role: 'ai', text: '...', isTyping: true }]);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://smart-grocery-lemon.vercel.app';
-      const response = await fetch(`${apiUrl}/api/chat`, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessageText, cart })
       });
+
 
       const data = await response.json();
       
