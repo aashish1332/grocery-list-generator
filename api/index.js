@@ -137,9 +137,14 @@ app.post('/api/chat', async (req, res) => {
     res.json({ text });
   } catch (error) {
     console.error('AI Chat Error:', error);
-    res.status(500).json({ message: 'AI Assistant is currently unavailable', error: error.message });
+    res.status(500).json({ 
+      message: 'AI Assistant is currently unavailable', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
+
 
 
 // Start Server (only for local dev)
