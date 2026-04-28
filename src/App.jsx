@@ -250,7 +250,13 @@ function App() {
   return (
     <>
       <ShaderAnimation isLightMode={isLightMode} />
+      <div className="parallax-bg">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+        <div className="blob blob-3"></div>
+      </div>
       <nav className="navbar">
+
         <div className="container navbar-content">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
