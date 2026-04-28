@@ -4,7 +4,7 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from 'openai';
 
 import User from './models/User.js';
 
@@ -101,47 +101,51 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// AI Chat Route
+// AI Chat Route (OpenAI - gpt-4o-mini)
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, cart } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     
     if (!apiKey) {
       return res.status(500).json({ message: 'AI API Key not configured on server' });
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const openai = new OpenAI({ apiKey });
 
     const cartContext = cart && cart.length > 0 
       ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
       : 'Cart is empty.';
 
-    const prompt = `You are an intelligent grocery assistant for "SmartGrocery", a premium grocery shopping app.
-      User's current state: ${cartContext}
-      User's message: "${message}"
-      
-      Instructions:
-      - Be helpful, polite, and concise.
-      - Suggest relevant Indian groceries if asked for recommendations.
-      - If they ask for a recipe, check their cart and suggest what they can make or what's missing.
-      - Keep responses under 3 paragraphs.
-      
-      Respond as the AI assistant:`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an intelligent grocery assistant for "SmartGrocery", a premium grocery shopping app.
+            Instructions:
+            - Be helpful, polite, and concise.
+            - Suggest relevant Indian groceries if asked for recommendations.
+            - If they ask for a recipe, check their cart and suggest what they can make or what's missing.
+            - Keep responses under 3 paragraphs.`
+        },
+        {
+          role: "user",
+          content: `${cartContext}\n\nUser's message: "${message}"`
+        }
+      ],
+      max_tokens: 300,
+    });
     
+    const text = completion.choices[0].message.content;
     res.json({ text });
   } catch (error) {
     console.error('AI Chat Error:', error.message);
     
     const errorMsg = error.message || '';
-    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Too Many Requests')) {
+    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('Rate limit')) {
       return res.status(429).json({ 
-        text: "I'm getting a lot of requests right now! The free Gemini API quota has been temporarily exceeded. Please wait a minute and try again. 🙏"
+        text: "I'm getting a lot of requests right now! Please wait a moment and try again. 🙏"
       });
     }
     
@@ -151,6 +155,7 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 });
+
 
 
 
