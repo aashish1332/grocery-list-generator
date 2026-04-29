@@ -101,61 +101,61 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// AI Chat Route (OpenAI - gpt-4o-mini)
+// AI Chat Route (Robust with Fallback)
 app.post('/api/chat', async (req, res) => {
+  const { message, cart } = req.body;
+  const apiKey = process.env.GROK_API_KEY;
+  
+  if (!apiKey) {
+    return res.status(500).json({ message: 'Grok API Key not configured' });
+  }
+
+  const openai = new OpenAI({ 
+    apiKey,
+    baseURL: 'https://api.x.ai/v1',
+  });
+
+  const cartContext = cart && cart.length > 0 
+    ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
+    : 'Cart is empty.';
+
   try {
-    const { message, cart } = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      return res.status(500).json({ message: 'AI API Key not configured on server' });
-    }
-
-    const openai = new OpenAI({ apiKey });
-
-    const cartContext = cart && cart.length > 0 
-      ? `Current cart: ${cart.map(item => `${item.name} (Qty: ${item.quantity || 1})`).join(', ')}`
-      : 'Cart is empty.';
-
+    console.log(`🤖 Attempting AI response with Grok (x.ai)`);
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "grok-beta",
       messages: [
         {
           role: "system",
-          content: `You are an intelligent grocery assistant for "SmartGrocery", a premium grocery shopping app.
-            Instructions:
+          content: `You are an intelligent grocery assistant for "SmartGrocery".
             - Be helpful, polite, and concise.
-            - Suggest relevant Indian groceries if asked for recommendations.
-            - If they ask for a recipe, check their cart and suggest what they can make or what's missing.
-            - Keep responses under 3 paragraphs.`
+            - Suggest Indian groceries if asked.
+            - Max 2 paragraphs.`
         },
         {
           role: "user",
-          content: `${cartContext}\n\nUser's message: "${message}"`
+          content: `${cartContext}\n\nUser: "${message}"`
         }
       ],
       max_tokens: 300,
     });
     
     const text = completion.choices[0].message.content;
-    res.json({ text });
+    return res.json({ text });
   } catch (error) {
-    console.error('AI Chat Error:', error.message);
-    console.error('AI Chat Error Status:', error.status);
+    console.error(`❌ Grok API failed: ${error.message}`);
     
     if (error.status === 429) {
       return res.status(429).json({ 
-        text: "I'm getting a lot of requests right now! Please wait a moment and try again. 🙏"
+        text: "Grok is currently at its limit. Please wait a minute or try again later! 🙏"
       });
     }
-    
-    res.status(500).json({ 
-      message: 'AI Assistant is currently unavailable', 
-      error: error.message,
-      status: error.status
-    });
 
+    res.status(500).json({ 
+      message: 'Grok AI Assistant is currently busy', 
+      error: error.message
+    });
   }
+
 });
 
 

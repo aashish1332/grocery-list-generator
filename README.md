@@ -32,27 +32,18 @@ A premium, AI-powered grocery suggestion and list management application built w
    ```
 2. Install dependencies:
    ```bash
-   # Root (Frontend)
-   npm install
-
-   # Backend
-   cd backend
    npm install
    ```
-3. Configure environment variables in `backend/.env`:
+3. Configure environment variables in `.env` (root):
    ```env
    PORT=5000
-   MONGODB_URI=your_mongodb_uri
+   MONGO_URI=your_mongodb_uri
    JWT_SECRET=your_secret_key
+   GROK_API_KEY=your_openrouter_api_key
    ```
 4. Start the development servers:
    ```bash
-   # Frontend
    npm run dev
-
-   # Backend
-   cd backend
-   npm start
    ```
 
 ## 📝 License
